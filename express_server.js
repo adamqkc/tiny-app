@@ -27,15 +27,23 @@ app.get("/urls/:id", (req, res) => {
     shortURL: req.params.id,
     urls: urlDatabase
   };
-  res.render("urls_show", templateVars);ç
+  res.render("urls_show", templateVars);
 });
 
+
 app.post("/urls", (req, res) => {
-  
+  let shortURL = main.generateRandomString(); // Create shortURL
+  req.body[shortURL] = req.body['longURL'];    // create property:value 
+  delete req.body['longURL'];
   Object.assign(urlDatabase, req.body);
-  console.log(req.body);
   console.log(urlDatabase);
-  res.send("Ok");         
+  res.redirect("/urls/" + shortURL);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  console.log(req.params);
+  let longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
 });
 
 app.listen(PORT, () => {
