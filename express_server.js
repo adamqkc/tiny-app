@@ -35,11 +35,6 @@ function emailCheck(email) {
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-// app.use(cookieSession({
-//   name: 'session',
-//   keys: ['key1', 'key2']
-// }))
-
 
 app.get('/urls/new', (req, res) => {
   console.log(urlDatabase);
@@ -48,16 +43,19 @@ app.get('/urls/new', (req, res) => {
 
 app.get('/urls', (req, res) => {
   let templateVars = { 
-    username: req.cookies['username'],
+    // username: req.cookies['username'],
+    username: users[req.body.username],
     urls: urlDatabase 
   };
-  console.log(urlDatabase);
+  // console.log(urlDatabase);
+  console.log(templateVars.username);
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls/:id', (req, res) => {
   let templateVars = { 
-    username: req.cookies['username'],
+    // username: users[req.body.user_id],
+    username: users[req.body.username],
     shortURL: req.params.id,
     urls: urlDatabase
   };
@@ -75,9 +73,13 @@ app.get('/register', (req, res) => {
   res.render('register')
 })
 
+app.get('/login', (req, res) => {
+  res.render('login')
+})
+
 app.post('/urls', (req, res) => {
-  let shortURL = main.generateRandomString(); // Create shortURL
-  req.body[shortURL] = req.body['longURL'];    // create property:value 
+  let shortURL = main.generateRandomString(); 
+  req.body[shortURL] = req.body['longURL'];    
   delete req.body['longURL'];
   Object.assign(urlDatabase, req.body);
   console.log(urlDatabase);
@@ -85,7 +87,7 @@ app.post('/urls', (req, res) => {
 });
 
 app.post('/urls/:id/delete', (req, res) => {
-  delete urlDatabase[req.params.id]; // TEMP
+  delete urlDatabase[req.params.id]; 
   console.log(urlDatabase);
   res.redirect('/urls');
 });
@@ -97,7 +99,7 @@ app.post('/urls/:id', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
+  res.cookie('username', req.body.username); // Edit later
   res.redirect('/urls');
 })
 

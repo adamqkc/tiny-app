@@ -2,17 +2,20 @@
   TinyApp!
 </header>
 
+
 <% if (!username) { %>
-  <form action="/login" method="POST">
-    <label>Login: 
+  <form method="POST" action="/login">
+    <label>Login:
       <input type="text" name="username">
       <input type="submit" value="Submit">
     </label>
   </form>
 <% } else { %>
-  <form action="/logout" method="POST">
-    <label><%= username %>
-      <input type="submit" value="Logout">
-    </label>
-  </form>
+    <form method="POST" action="/logout">
+      <label>Logged in
+        <%= username %>
+          <input type="submit" value="Logout">
+      </label>
+    </form>
 <% } %>
+
