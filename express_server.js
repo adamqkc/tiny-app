@@ -5,15 +5,15 @@ const bodyParser = require('body-parser');
 const main = require('./main');
 const cookieParser = require('cookie-parser');
 const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+  'userRandomID': {
+    id: 'userRandomID',
+    email: 'user@example.com',
+    password: 'purple-monkey-dinosaur'
   },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
+  'user2RandomID': {
+    id: 'user2RandomID',
+    email: 'user2@example.com',
+    password: 'dishwasher-funk'
   }
 }
 const urlDatabase = {
@@ -22,7 +22,7 @@ const urlDatabase = {
 };
 // const cookieSession = require('cookie-session')
 
-// import function not working, temporarily placing function here
+// import functions not working, temporarily placing function here
 function emailCheck(email) {
   for (var user in users) {
     if (users[user]['email'] === email) {
@@ -30,40 +30,50 @@ function emailCheck(email) {
     }
   }
   return false;
+};
+
+function loginVerification(userEmail, userPassword, res) {
+  for (var user in users) {
+    if (users[user]['email'] === userEmail && users[user]['password'] === userPassword) {
+      res.cookie('user_id', user)
+      return true;
+    }
+  }
+  return false;
 }
+////////////////
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.get('/urls/new', (req, res) => {
-  console.log(urlDatabase);
   res.render('urls_new');
 });
 
 app.get('/urls', (req, res) => {
-  let templateVars = { 
-    username: req.cookies['username'],
-    urls: urlDatabase 
-  };
-  // console.log(urlDatabase);
-  console.log(templateVars.username);
-  res.render('urls_index', templateVars);
+  if (req.cookies['user_id']) {
+    let templateVars = { 
+      user: users[req.cookies['user_id']],
+      urls: urlDatabase
+    };
+    res.render('urls_index', templateVars);
+  } else {
+    res.render('login');
+  }
 });
 
 app.get('/urls/:id', (req, res) => {
   let templateVars = { 
-    username: req.cookies['username'],
+    user: users[req.cookies['user_id']],
     shortURL: req.params.id,
     urls: urlDatabase
   };
-  console.log(urlDatabase);
   res.render('urls_show', templateVars);
 });
 
 app.get('/u/:shortURL', (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
-  console.log(urlDatabase);
   res.redirect(longURL);
 });
 
@@ -80,37 +90,37 @@ app.post('/urls', (req, res) => {
   req.body[shortURL] = req.body['longURL'];    
   delete req.body['longURL'];
   Object.assign(urlDatabase, req.body);
-  console.log(urlDatabase);
   res.redirect('/urls/' + shortURL);
 });
 
 app.post('/urls/:id/delete', (req, res) => {
   delete urlDatabase[req.params.id]; 
-  console.log(urlDatabase);
   res.redirect('/urls');
 });
 
 app.post('/urls/:id', (req, res) => {
   urlDatabase[req.params.id] = req.body.updatedURL;
-  console.log(urlDatabase);
   res.redirect('/urls')
 });
 
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username); // Edit later
-  res.redirect('/urls');
+  if (loginVerification(req.body.email, req.body.password, res)) {
+    res.redirect('/urls');
+  } else {
+    res.status(403).send('Email or password is incorrect, please try again.');
+  }
 })
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
-  res.redirect('/urls')
+  res.clearCookie('user_id');
+  res.redirect('/urls');
 })
 
 app.post('/register', (req, res) => {
   if (req.body.email === '' || req.body.password === '') {
-    res.sendStatus(400);
+    res.status(400).send('Error code 400! Please fill out both fields.');
   } else if (emailCheck(req.body.email)) {
-    res.sendStatus(400);
+    res.status(400).send('Error code 400! Please enter a different email.');
   } else {
     let userID = main.generateRandomString();
     users[userID] = {
