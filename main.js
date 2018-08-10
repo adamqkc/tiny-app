@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 function generateRandomString() {
   var randomString = '';
   var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -17,10 +19,11 @@ function emailCheck(userEmail, users) {
   return false;
 }
 
-function loginVerification(userEmail, userPassword, users, res) {
+function loginVerification(userEmail, userPassword, users, req) {
   for (var user in users) {
-    if (users[user]['email'] === userEmail && users[user]['password'] === userPassword) {
-      res.cookie('user_id', user)
+    if (users[user]['email'] === userEmail && 
+        bcrypt.compareSync(userPassword, users[user]['password'])) {
+      req.session.user_id = user;
       return true;
     }
   }
