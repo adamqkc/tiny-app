@@ -43,8 +43,7 @@ app.get('/urls/new', (req, res) => {
 
 app.get('/urls', (req, res) => {
   let templateVars = { 
-    // username: req.cookies['username'],
-    username: users[req.body.username],
+    username: req.cookies['username'],
     urls: urlDatabase 
   };
   // console.log(urlDatabase);
@@ -54,8 +53,7 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   let templateVars = { 
-    // username: users[req.body.user_id],
-    username: users[req.body.username],
+    username: req.cookies['username'],
     shortURL: req.params.id,
     urls: urlDatabase
   };
@@ -110,9 +108,9 @@ app.post('/logout', (req, res) => {
 
 app.post('/register', (req, res) => {
   if (req.body.email === '' || req.body.password === '') {
-    res.status(400).send('Please fill in both fields. <a href="/register">Return to registration</a>');
+    res.sendStatus(400);
   } else if (emailCheck(req.body.email)) {
-    res.status(400).send('Email already exists, please try again. <a href="/register">Return to registration</a>');
+    res.sendStatus(400);
   } else {
     let userID = main.generateRandomString();
     users[userID] = {
