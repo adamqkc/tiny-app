@@ -2,7 +2,6 @@
 <html lang='en'>
 
 <head>
-  <title>TinyApp</title>
 </head>
 
 <body>
@@ -12,10 +11,10 @@
 
   <ul>
     <% for (var key in urls) { %>
-      <li><%= urls[key] %></li>
+      <li><%= key %> : <%= urls[key] %></li>
         <form action='/urls/<%= key %>/delete' method='POST'>
           <input type='submit' name='delete' value='Delete'>
-              <a href='/urls/<%= key %>'> EDIT </a>
+            <a href='/urls/<%= key %>'> EDIT </a>
         </form>
       <% } %>
   </ul>

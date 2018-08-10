@@ -4,6 +4,10 @@
 <head></head>
 
 <body style='font-size:20px; padding:50px;'>
+  <header>
+    <% include ./partials/_header %>
+  </header>
+  
   <form action='/urls' method='POST' style='margin:150px;'>
     <label> Enter a URL to make tiny!
       <input id='longURL' type='text' name='longURL' placeholder='http://www.example.com' style='width: 300px'>

@@ -17,10 +17,17 @@ const users = {
   }
 }
 const urlDatabase = {
-'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+  'b2xVn2': {
+    shortURL: 'b2xVn2',
+    longURL: 'http://www.lighthouselabs.ca',
+    userID: 'qwerty'
+  },
+  '9sm5xK': {
+    shortURL: '9sm5xK',
+    longURL: 'http://www.google.com',
+    userID: 'asdfgh'
+  }
 };
-// const cookieSession = require('cookie-session')
 
 // import functions not working, temporarily placing function here
 function emailCheck(email) {
@@ -48,16 +55,27 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  if (req.cookies['user_id']) {
+    let templateVars = {
+      user: users[req.cookies['user_id']],
+    }
+    console.log(templateVars.user);
+    res.render('urls_new', templateVars);
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get('/urls', (req, res) => {
-  let templateVars = { 
-    user: users[req.cookies['user_id']],
-    urls: urlDatabase
-  };
-  res.render('urls_index', templateVars);
-  // res.render('login');
+  if (req.cookies['user_id']) {
+    let templateVars = { 
+      user: users[req.cookies['user_id']],
+      urls: urlDatabase
+    };
+    res.render('urls_index', templateVars);
+  } else {
+    res.render('login');
+  }
 });
 
 app.get('/urls/:id', (req, res) => {
@@ -79,14 +97,18 @@ app.get('/register', (req, res) => {
 })
 
 app.get('/login', (req, res) => {
+
   res.render('login')
 })
 
 app.post('/urls', (req, res) => {
-  let shortURL = main.generateRandomString(); 
-  req.body[shortURL] = req.body['longURL'];    
-  delete req.body['longURL'];
-  Object.assign(urlDatabase, req.body);
+  let shortURL = main.generateRandomString();
+  let urlObj = {};
+  urlObj.shortURL = shortURL;
+  urlObj.longURL = req.body['longURL'];
+  urlObj.userID = req.cookies['user_id'];
+  urlDatabase[shortURL] = urlObj;
+  console.log(urlDatabase);
   res.redirect('/urls/' + shortURL);
 });
 
