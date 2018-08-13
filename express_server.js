@@ -1,13 +1,12 @@
 const express = require('express');
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080; 
 const bodyParser = require('body-parser');
 const main = require('./main');
-// const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session')
 const bcrypt = require('bcrypt');
 
-// Default users database
+// Template users database
 const users = {
   'userRandomID': {
     id: 'userRandomID',
@@ -20,7 +19,7 @@ const users = {
     password: bcrypt.hashSync('dishwasher-funk', 10)
   }
 }
-// Default URL database
+// Template URL database
 const urlDatabase = {
   'b2xVn2': {
     shortURL: 'b2xVn2',
@@ -47,13 +46,17 @@ app.use(cookieSession({
 /*                  GET REQUESTS FOR DAYZZZ                  */
 /*-----------------------------------------------------------*/
 
-// Root page!
+// Homepage!
 app.get('/urls', (req, res) => {
-  let templateVars = { 
-    user: users[req.session.user_id],
-    urls: main.getUserURLS(urlDatabase, req.session.user_id)
-  };
-  res.render('urls_index', templateVars);
+  if (req.session.user_id) {
+    let templateVars = { 
+      user: users[req.session.user_id],
+      urls: main.getUserURLS(urlDatabase, req.session.user_id)
+    };
+    res.render('urls_index', templateVars);
+  } else {
+    res.redirect('/login');
+  }
 });
 
 // Create new short URL!
@@ -99,11 +102,12 @@ app.get('/u/:shortURL', (req, res) => {
   // console.log(urlDatabase[req.params.shortURL]['shortURL']);
 }); 
 
-// Self explanatory
+// Registration page
 app.get('/register', (req, res) => {
   res.render('register')
 })
 
+// Login page
 app.get('/login', (req, res) => {
   res.render('login')
 })
@@ -140,7 +144,7 @@ app.post('/urls/:id', (req, res) => {
   }
 });
 
-// Self explanatory
+// Login and user verification 
 app.post('/login', (req, res) => {
   if (main.loginVerification(req.body.email, req.body.password, users, req)) {
     res.redirect('/urls');
@@ -149,11 +153,13 @@ app.post('/login', (req, res) => {
   }
 })
 
+// Logs out user and deletes cookie
 app.post('/logout', (req, res) => {
   req.session.user_id = null;
   res.redirect('/urls');
 })
 
+// Creates and saves new user account data 
 app.post('/register', (req, res) => {
   if (req.body.email === '' || req.body.password === '') {
     res.status(400).send('Error code 400! Please fill out both fields.');
