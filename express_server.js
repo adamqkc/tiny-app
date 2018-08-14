@@ -97,9 +97,6 @@ app.get('/u/:shortURL', (req, res) => {
     let longURL = urlDatabase[req.params.shortURL]['longURL'];
     res.redirect(longURL);
   }
-  // console.log('shortURL: ' + req.params.shortURL);
-  // console.log(urlDatabase);
-  // console.log(urlDatabase[req.params.shortURL]['shortURL']);
 }); 
 
 // Registration page
@@ -133,7 +130,7 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
-// Redirect user to website!
+// Edit existing long URLS
 app.post('/urls/:id', (req, res) => {
   if (req.body.newURL === '') {
     res.status(400).send('Error code 400! Please enter a valid website!')
